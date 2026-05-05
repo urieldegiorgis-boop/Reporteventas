@@ -1102,14 +1102,14 @@ function renderHistorialPanel(){
   var psel=ge('hist-persona'),prev=psel?psel.value:'';
   if(psel){psel.innerHTML='<option value="">Todos</option>'+personas.map(n=>'<option value="'+n+'"'+(n===prev?' selected':'')+'>'+n+'</option>').join('');}
   var filtro=psel?psel.value:'';
-  var filtered=(filtro?reps.filter(r=>r.quien===filtro):reps).slice().sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+var filtered=(filtro?reps.filter(r=>(r.quien||r.closer)===filtro):reps)
   ge('hist-titulo').textContent='Historial – '+(eq==='closers'?'Closers':'Setters');
   if(eq==='closers'){
     ge('hist-thead').innerHTML='<tr><th>Fecha</th><th>Closer</th><th>Calls</th><th>Cancel</th><th>No Show</th><th>Show Rate</th><th>Ofertas</th><th>Cierres</th><th>Call/Cierre</th><th>All/Cierre</th><th></th></tr>';
     ge('hist-tbody').innerHTML=filtered.map(r=>{
       var k=calcCloserKPI(r),rts=r.ts||0;
-      return '<tr><td>'+fmtDate(r.fecha)+'</td><td class="t1">'+r.quien+'</td>'+
-        '<td>'+k.calls+'</td>'+
+return '<tr><td>'+fmtDate(r.fecha)+'</td><td class="t1">'+(r.quien||r.closer)+'</td>'+
+  '<td>'+k.calls+'</td>'+
         '<td style="color:'+(k.cancel>0?'var(--red)':'var(--t2)')+'">'+k.cancel+'</td>'+
         '<td style="color:'+(k.noshow>0?'var(--amber)':'var(--t2)')+'">'+k.noshow+'</td>'+
         '<td style="color:'+colPct(k.showRate,70,50)+'">'+fmtPct(k.showRate)+'</td>'+
