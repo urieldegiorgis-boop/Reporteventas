@@ -998,7 +998,7 @@ function renderChartClosers(){
 }
 function renderDashSetters(){
   var reps=filtrarPorPeriodo(appData.reportes_setter);
-  ge('dash-tabla-titulo').textContent='Resumen por Setter';
+var personas=[...new Set(reps.map(r=>r.quien||r.closer))].sort();
   ge('dash-chart-titulo').textContent='Convos & Agendadas por Setter';
   var personas={};
   reps.forEach(r=>{if(!personas[r.quien])personas[r.quien]=[];personas[r.quien].push(r);});
