@@ -819,8 +819,8 @@ async function guardarCloser(){
   var fecha=ge('cr-fecha').value||today();
   var yaExiste=appData.reportes_closer.find(function(x){return x.closer===quien&&x.fecha===fecha;});
   if(yaExiste){alert('\u26a0\ufe0f Ya has guardado un reporte para hoy. Verifica el historial.');return;}
-  var r={closer:quien,fecha:fecha,ts:Date.now(),
-    calls:gv('cr-calls'),cancel:gv('cr-cancel'),live:gv('cr-live'),noshow:gv('cr-noshow'),
+var r={closer:quien,quien:quien,fecha:fecha,ts:Date.now(),
+       calls:gv('cr-calls'),cancel:gv('cr-cancel'),live:gv('cr-live'),noshow:gv('cr-noshow'),
     o1:gv('cr-o1'),o2:gv('cr-o2'),d1:gv('cr-d1'),d2:gv('cr-d2'),cierres:gv('cr-cierres'),
     llamadas:JSON.stringify(recogerLlamadas())};
   try{
