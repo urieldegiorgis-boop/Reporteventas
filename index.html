@@ -757,6 +757,8 @@ function renderCal(prefix,nombre){
 
 // ── KPI calc ──
 function calcCloserKPI(r){
+  if(typeof r.llamadas==='string'){try{r.llamadas=JSON.parse(r.llamadas);}catch(e){r.llamadas=[];}}
+  if(!Array.isArray(r.llamadas)) r.llamadas=[];
   var calls=+(r.calls||0),cancel=+(r.cancel||0),live=+(r.live||0),noshow=+(r.noshow||0);
   var ofertas=(+(r.o1||0))+(+(r.o2||0));
   var deps=(+(r.d1||0))+(+(r.d2||0));
@@ -1428,7 +1430,10 @@ function renderAnalisis(){
 
   var todasLlamadas = [];
   reps.forEach(function(r){
-    if(r.llamadas) r.llamadas.forEach(function(l){
+    var llamadas = r.llamadas;
+    if(typeof llamadas === 'string'){try{llamadas=JSON.parse(llamadas);}catch(e){llamadas=[];}}
+    if(!Array.isArray(llamadas)) llamadas=[];
+    if(llamadas) llamadas.forEach(function(l){
       todasLlamadas.push({
         nombre:l.nombre||'',email:l.email||'',edad:l.edad||'',
         fuente:l.fuente||'',situacion:l.situacion||'',dolor:l.dolor||'',
