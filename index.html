@@ -1499,6 +1499,7 @@ function renderAnalisis(){
       +'<td style="'+TDC+'"><span style="background:var(--bg3);padding:2px 8px;border-radius:99px;font-size:11px;color:var(--t2);">'+l.interes+' ★</span></td>'
       +'<td style="'+TDC+'color:var(--t2);font-size:11px;">'+l.quien+'</td>'
       +(l.fathom?'<td style="'+TDC+'"><a href="'+l.fathom+'" target="_blank" rel="noopener" style="color:var(--accent,#4A9EFF);font-size:11px;text-decoration:none;font-weight:500;">Ver ↗</a></td>':'<td style="'+TDC+'color:var(--t3);font-size:11px;">—</td>')
+      +'<td style="'+TDC+'"><button onclick="eliminarLeadAnalisis(this)" data-nombre="'+l.nombre+'" data-email="'+l.email+'" data-fecha="'+l.fecha+'" data-quien="'+l.quien+'" style="width:24px;height:24px;border-radius:6px;border:0.5px solid rgba(216,90,48,0.3);background:transparent;cursor:pointer;font-size:14px;color:#F0997B;line-height:1;" title="Eliminar lead">×</button></td>'
       +'</tr>';
   }).join('');
 
@@ -1511,7 +1512,10 @@ function renderAnalisis(){
     analisisCard('Dolor — tasa de cierre','dolor')+
     analisisCard('Situación — tasa de cierre','situacion')+
     '<div style="grid-column:1/-1;background:var(--bg2);border-radius:var(--r12);padding:18px 20px;">'
-    +'<div style="font-size:12px;font-weight:600;color:var(--t1);margin-bottom:14px;text-transform:uppercase;letter-spacing:.06em;">Todos los leads ('+todasLlamadas.length+')</div>'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">'
+    +'<div style="font-size:12px;font-weight:600;color:var(--t1);text-transform:uppercase;letter-spacing:.06em;">Todos los leads ('+todasLlamadas.length+')</div>'
+    +'<button onclick="descargarLeadsPDF()" style="padding:6px 14px;border-radius:6px;border:0.5px solid rgba(55,138,221,0.4);background:rgba(55,138,221,0.1);color:var(--blue);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;" onmouseover="this.style.background=\'rgba(55,138,221,0.2)\'" onmouseout="this.style.background=\'rgba(55,138,221,0.1)\'">⬇ Descargar PDF</button>'
+    +'</div>'
     +'<div style="overflow-x:auto;border-radius:var(--r8);border:0.5px solid var(--b0);">'
     +'<table style="width:100%;border-collapse:collapse;font-size:12px;min-width:700px;">'
     +'<thead><tr>'
@@ -1525,6 +1529,7 @@ function renderAnalisis(){
     +'<th style="'+THC+'">Interés</th>'
     +'<th style="'+THC+'">Closer</th>'
     +'<th style="'+THC+'">Fathom</th>'
+    +'<th style="'+THC+'"></th>'
     +'</tr></thead>'
     +'<tbody>'+leadsHTML+'</tbody></table></div></div>';
 }
@@ -1751,6 +1756,97 @@ async function rmLeadFromLL(el){
   }catch(e){}
   appData.leads_setter=appData.leads_setter.filter(function(l){return l.id!==lid;});
   renderLlamadasPanel();
+}
+
+// ── Eliminar lead desde tabla de análisis ──
+function eliminarLeadAnalisis(btn){
+  var nombre = btn.getAttribute('data-nombre');
+  var email  = btn.getAttribute('data-email');
+  var fecha  = btn.getAttribute('data-fecha');
+  var quien  = btn.getAttribute('data-quien');
+  if(!confirm('¿Eliminar el lead "'+nombre+'" del reporte?')) return;
+
+  // Buscar el reporte del closer que contiene esta llamada
+  var rep = appData.reportes_closer.find(function(r){
+    return r.quien===quien && r.fecha===fecha;
+  });
+  if(!rep) return;
+
+  var llamadas = rep.llamadas;
+  if(typeof llamadas==='string'){try{llamadas=JSON.parse(llamadas);}catch(e){llamadas=[];}}
+  if(!Array.isArray(llamadas)) llamadas=[];
+
+  // Eliminar la primera coincidencia por nombre+email
+  var idx = llamadas.findIndex(function(l){
+    return l.nombre===nombre && (l.email||'')===(email||'');
+  });
+  if(idx===-1) return;
+  llamadas.splice(idx,1);
+  rep.llamadas = llamadas;
+
+  // Guardar en Supabase
+  (async function(){
+    try{
+      await fetch(SB_URL+'/rest/v1/reportes_closer?ts=eq.'+encodeURIComponent(rep.ts),{
+        method:'PATCH',
+        headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body:JSON.stringify({llamadas:JSON.stringify(llamadas)})
+      });
+    }catch(e){}
+    // Feedback visual
+    var row = btn.closest('tr');
+    if(row){row.style.transition='opacity .3s';row.style.opacity='0';setTimeout(function(){renderAnalisis();},300);}
+    else{renderAnalisis();}
+  })();
+}
+
+// ── Descargar tabla de leads como PDF ──
+function descargarLeadsPDF(){
+  var tabla = document.querySelector('#dash-analisis-grid table');
+  if(!tabla){alert('No hay leads para exportar.');return;}
+
+  var win = window.open('','_blank');
+  if(!win) return;
+
+  // Recoger filas sin la columna del botón ×
+  var filas = Array.from(tabla.querySelectorAll('tr')).map(function(tr){
+    var celdas = Array.from(tr.querySelectorAll('th,td'));
+    // quitar última celda (botón ×)
+    var sinBoton = celdas.slice(0, celdas.length-1);
+    return sinBoton.map(function(td){
+      // Si la celda tiene un enlace, devolver el href en vez del texto visible
+      var a = td.querySelector('a[href]');
+      if(a && a.href) return a.href;
+      return td.innerText||td.textContent||'';
+    });
+  });
+
+  var htmlTabla = '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;width:100%;font-size:11px;font-family:sans-serif;">'
+    + filas.map(function(cols,i){
+        return '<tr style="background:'+(i===0?'#222':'#fff')+';color:'+(i===0?'#fff':'#333')+'">'
+          + cols.map(function(c){
+              if(i===0) return '<th>'+c+'</th>';
+              // Si el valor es una URL, renderizarlo como enlace
+              if(c && (c.startsWith('http://') || c.startsWith('https://'))){
+                return '<td><a href="'+c+'" style="color:#378ADD;font-size:10px;word-break:break-all;">'+c+'</a></td>';
+              }
+              return '<td>'+c+'</td>';
+            }).join('')
+          +'</tr>';
+      }).join('')
+    +'</table>';
+
+  var periodo = document.querySelector('#dash-periodo') ? document.querySelector('#dash-periodo').value : '';
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Leads Export</title>'
+    +'<style>body{margin:20px;font-family:sans-serif;}h2{font-size:14px;margin-bottom:8px;color:#333;}p{font-size:11px;color:#666;margin-bottom:14px;}'
+    +'@media print{button{display:none;}}</style></head><body>'
+    +'<h2>Todos los Leads — Lathos Academy</h2>'
+    +'<p>Exportado el '+new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'})+'</p>'
+    +htmlTabla
+    +'<br><button onclick="window.print()" style="padding:8px 18px;background:#378ADD;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;">🖨 Imprimir / Guardar PDF</button>'
+    +'</body></html>');
+  win.document.close();
+  setTimeout(function(){win.print();},600);
 }
 
 // ── Init ──
