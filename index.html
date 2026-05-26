@@ -322,6 +322,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
         <option value="6meses">Last 6 months</option>
         <option value="anio">This year</option>
         <option value="todo">All</option>
+        <option value="custom">Personalizado</option>
       </select>
     </div>
     <div class="fg" id="dash-desde-wrap" style="display:none;"><label>Desde</label><input type="date" id="dash-desde" class="sel" onchange="renderDash()"></div>
@@ -899,6 +900,16 @@ function filtrarPorPeriodo(reportes){
   if(periodo==='3meses'){var m3=addDays(hoy,-90);return reportes.filter(r=>r.fecha&&r.fecha>=m3);}
   if(periodo==='6meses'){var m6=addDays(hoy,-180);return reportes.filter(r=>r.fecha&&r.fecha>=m6);}
   if(periodo==='anio'){var yr=hoy.slice(0,4);return reportes.filter(r=>r.fecha&&r.fecha.slice(0,4)===yr);}
+  if(periodo==='custom'){
+    var desde=ge('dash-desde').value;
+    var hasta=ge('dash-hasta').value;
+    return reportes.filter(function(r){
+      if(!r.fecha) return false;
+      if(desde && r.fecha<desde) return false;
+      if(hasta && r.fecha>hasta) return false;
+      return true;
+    });
+  }
   return reportes;
 }
 function renderDash(){
