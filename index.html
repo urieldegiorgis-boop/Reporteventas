@@ -770,7 +770,7 @@ function calcCloserKPI(r){
     showRate:pct(live,calls),
     ofertaPct:pct(ofertas,live),
     offerCierre:pct(cierres,ofertas),
-    callCierre:pct(cierres,ofertas),
+    callCierre:pct(cierres,live),
     allCierre:pct(cierres,calls)};
 }
 function calcSetterKPI(r){
@@ -793,7 +793,7 @@ function updateCloserPreview(){
     kpiBox('% Oferta',fmtPct(k.ofertaPct),colPct(k.ofertaPct,70,50))+
     kpiBox('Cierres',k.cierres,'var(--green)')+
     kpiBox('Depósitos',k.deps,'var(--amber)')+
-    kpiBox('Ofe/Cierre',fmtPct(k.callCierre),colPct(k.callCierre,30,15))+
+    kpiBox('Call/Cierre',fmtPct(k.callCierre),colPct(k.callCierre,30,15))+
     kpiBox('All/Cierre',fmtPct(k.allCierre),colPct(k.allCierre,20,10));
 }
 function updateSetterPreview(){
@@ -939,7 +939,7 @@ function renderDashClosers(){
     kpiBox('Ofertas',tot.ofertas,'var(--amber)')+
     kpiBox('% Oferta',fmtPct(gOC),colPct(gOC,70,50))+
     kpiBox('Cierres',tot.cierres,'var(--green)')+
-    kpiBox('Ofe/Cierre',fmtPct(gCC),colPct(gCC,30,15))+
+    kpiBox('Call/Cierre',fmtPct(gCC),colPct(gCC,30,15))+
     kpiBox('All/Cierre',fmtPct(gAC),colPct(gAC,20,10));
   ge('dash-thead').innerHTML='<tr><th>Closer</th><th>Calls</th><th>Live Calls</th><th>Cancel</th><th>Cancel %</th><th>No Show</th><th>No Show %</th><th>Show Rate</th><th>Ofertas</th><th>% Oferta</th><th>Cierres</th><th>Depósitos</th><th>Call/Cierre</th><th>All/Cierre</th></tr>';
   var tbodyHTML='',nombres=[],showRates=[],allCierres=[];
