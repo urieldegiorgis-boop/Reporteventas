@@ -43,9 +43,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .table-wrap{overflow:auto;}
 .tbl{width:100%;border-collapse:collapse;font-size:12px;}
 .tbl th{padding:10px 14px;text-align:center;font-size:10px;font-weight:600;color:#ffffff;text-transform:uppercase;letter-spacing:.06em;border-bottom:0.5px solid var(--b1);background:var(--bg3);white-space:nowrap;}
-.tbl td{padding:10px 14px;border-bottom:0.5px solid var(--b0);color:var(--t2);white-space:nowrap;font-size:13px;text-align:center;}
+.tbl td{padding:10px 14px;border-bottom:0.5px solid var(--b0);color:#ffffff;white-space:nowrap;font-size:13px;text-align:center;}
 .tbl tr:last-child td{border-bottom:none;}
-.tbl tr:hover td{background:rgba(255,255,255,0.03);}
+.tbl tbody tr:nth-child(odd) td{background:rgba(255,255,255,0.02);}
+.tbl tbody tr:nth-child(even) td{background:rgba(255,255,255,0.05);}
+.tbl tr:hover td{background:rgba(255,255,255,0.09)!important;}
 .tbl td.t1{color:var(--t1);font-weight:500;}
 .filtros{display:flex;gap:10px;margin-bottom:1rem;flex-wrap:wrap;align-items:flex-end;}
 .fg label{font-size:11px;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px;}
@@ -652,7 +654,7 @@ var COLORS=['#1D9E75','#378ADD','#EF9F27','#D85A30','#8B6CE7','#E7576C','#5BB8B2
 
 function ge(id){return document.getElementById(id);}
 function gv(id){return parseFloat(ge(id).value)||0;}
-function today(){return new Date().toISOString().slice(0,10);}
+function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function fmtDate(s){if(!s)return '';var p=s.split('-');return p[2]+'/'+p[1]+'/'+p[0].slice(2);}
 function pct(n,d){return d>0?+(n/d*100).toFixed(1):null;}
 function fmtPct(v){return v===null?'--':v.toFixed(1)+'%';}
@@ -966,7 +968,8 @@ function filtrarPorPeriodo(reportes){
   if(periodo==='7dias'){var d7=addDays(hoy,-6);return reportes.filter(r=>r.fecha&&r.fecha>=d7&&r.fecha<=hoy);}
   if(periodo==='semana'){
     var dow=d.getDay(),diff=d.getDate()-dow+(dow===0?-6:1);
-    var lun=new Date(d.getFullYear(),d.getMonth(),diff).toISOString().slice(0,10);
+    var lunD=new Date(d.getFullYear(),d.getMonth(),diff);
+    var lun=lunD.getFullYear()+'-'+String(lunD.getMonth()+1).padStart(2,'0')+'-'+String(lunD.getDate()).padStart(2,'0');
     return reportes.filter(r=>r.fecha&&r.fecha>=lun&&r.fecha<=hoy);
   }
   if(periodo==='semana_ant'){
@@ -1108,7 +1111,7 @@ var personas=[...new Set(reps.map(r=>r.quien||r.closer))].sort();
     kpiBox('Agendadas',tot.agendadas,'var(--green)')+
     kpiBox('Agenda %',fmtPct(gAP),colPct(gAP,60,30))+
     kpiBox('Convo/Call %',fmtPct(gCC),colPct(gCC,20,10));
-  ge('dash-thead').innerHTML='<tr><th>Setter</th><th>Convos</th><th>Convo/Link %</th><th>Links</th><th>Agenda %</th><th>Agendadas</th><th>Convo/Call %</th></tr>';
+  ge('dash-thead').innerHTML='<tr><th style="text-align:left">Setter</th><th>Convos</th><th>Convo/Link %</th><th>Links</th><th>Agenda %</th><th>Agendadas</th><th>Convo/Call %</th></tr>';
   var tbodyHTML='',nombres=[],nLinks=[],nAgendadas=[];
   Object.keys(personas).forEach(n=>{
     var agg={dms:0,convos:0,links:0,agendadas:0};
@@ -1194,7 +1197,8 @@ function renderHistorialPanel(){
   }
   else if(periodo==='semana'){
     var dow=d.getDay(),diff=d.getDate()-dow+(dow===0?-6:1);
-    var lun=new Date(d.getFullYear(),d.getMonth(),diff).toISOString().slice(0,10);
+    var lunD=new Date(d.getFullYear(),d.getMonth(),diff);
+    var lun=lunD.getFullYear()+'-'+String(lunD.getMonth()+1).padStart(2,'0')+'-'+String(lunD.getDate()).padStart(2,'0');
     reps=reps.filter(r=>r.fecha&&r.fecha>=lun&&r.fecha<=hoy);
   }
   else if(periodo==='mes') reps=reps.filter(r=>r.fecha&&r.fecha.slice(0,7)===hoy.slice(0,7));
@@ -1487,7 +1491,8 @@ function renderSetterStats(){
   if(periodo==='hoy') reps=reps.filter(r=>r.fecha===hoy);
   else if(periodo==='semana'){
     var dow=d.getDay(),diff=d.getDate()-dow+(dow===0?-6:1);
-    var lun=new Date(d.getFullYear(),d.getMonth(),diff).toISOString().slice(0,10);
+    var lunD=new Date(d.getFullYear(),d.getMonth(),diff);
+    var lun=lunD.getFullYear()+'-'+String(lunD.getMonth()+1).padStart(2,'0')+'-'+String(lunD.getDate()).padStart(2,'0');
     reps=reps.filter(r=>r.fecha&&r.fecha>=lun&&r.fecha<=hoy);
   }
   else if(periodo==='mes') reps=reps.filter(r=>r.fecha&&r.fecha.slice(0,7)===hoy.slice(0,7));
@@ -1575,7 +1580,7 @@ function renderAnalisis(){
     var keys = Object.keys(counts).sort(function(a,b){return counts[b]-counts[a];});
     return keys.map(function(v){
       var total=counts[v], cerro=cerrados[v]||0, tasa=total>0?Math.round(cerro/total*100):0;
-      var pct_bar = maxVal>0 ? Math.round(total/maxVal*100) : 0;
+      var pct_bar = tasa;
       var color = tasa>=50?'var(--green)':tasa>=25?'var(--amber)':'var(--red)';
       return '<div style="margin-bottom:10px;">'
         +'<div style="display:flex;justify-content:space-between;margin-bottom:3px;">'
@@ -1789,7 +1794,8 @@ function renderLlamadasPanel(){
   }
   else if(periodo==='semana'){
     var d=new Date(),dow=d.getDay(),diff=d.getDate()-dow+(dow===0?-6:1);
-    var lun=new Date(d.getFullYear(),d.getMonth(),diff).toISOString().slice(0,10);
+    var lunD3=new Date(d.getFullYear(),d.getMonth(),diff);
+    var lun=lunD3.getFullYear()+'-'+String(lunD3.getMonth()+1).padStart(2,'0')+'-'+String(lunD3.getDate()).padStart(2,'0');
     var dom=addD(7-dow);
     leads=leads.filter(function(l){return l.fechaLlamada>=lun&&l.fechaLlamada<=dom;});
   }
@@ -2084,19 +2090,20 @@ function renderDashCC(reps){
     kpiBox('Offer%',fmtPct(k.offerPct),colPct(k.offerPct,40,20))+
     kpiBox('Agenda%',fmtPct(k.agendaPct),colPct(k.agendaPct,40,20))+
     kpiBox('Valid→Book%',fmtPct(k.validBook),colPct(k.validBook,15,8));
-  ge('dash-thead').innerHTML='<tr><th>Cold Caller</th><th>Assigned</th><th>Valid</th><th>Attempts</th><th>Responses</th><th>Convos</th><th>Offers</th><th>Booked</th><th>Resp%</th><th>Convo%</th><th>Offer%</th><th>Agenda%</th><th>Valid→Book%</th></tr>';
+  ge('dash-thead').innerHTML='<tr><th style="text-align:left">Cold Caller</th><th>Assigned</th><th>Valid</th><th>Attempts</th><th>Responses</th><th>Convos</th><th>Offers</th><th>Booked</th><th>Resp%</th><th>Convo%</th><th>Offer%</th><th>Agenda%</th><th>Valid→Book%</th></tr>';
   ge('dash-tbody').innerHTML=Object.keys(personas).map(function(n){
     var agg={assigned:0,valid:0,attempts:0,responses:0,convos:0,offers:0,booked:0};
     personas[n].forEach(function(r){Object.keys(agg).forEach(function(k){agg[k]+=(+(r[k]||0));});});
     var k2=calcCCKPI(agg);
-    return '<tr><td class="t1">'+n+'</td>'+
-      '<td>'+k2.assigned+'</td>'+
-      '<td>'+k2.valid+'</td>'+
-      '<td>'+k2.attempts+'</td>'+
-      '<td>'+k2.responses+'</td>'+
-      '<td>'+k2.convos+'</td>'+
-      '<td>'+k2.offers+'</td>'+
-      '<td class="t1" style="font-weight:700">'+k2.booked+'</td>'+
+    return '<tr>'+
+      '<td style="font-weight:600;color:#fff;text-align:left">'+n+'</td>'+
+      '<td style="color:#fff">'+k2.assigned+'</td>'+
+      '<td style="color:#fff">'+k2.valid+'</td>'+
+      '<td style="color:#fff">'+k2.attempts+'</td>'+
+      '<td style="color:#fff">'+k2.responses+'</td>'+
+      '<td style="color:#fff">'+k2.convos+'</td>'+
+      '<td style="color:#fff">'+k2.offers+'</td>'+
+      '<td style="color:#fff;font-weight:700">'+k2.booked+'</td>'+
       '<td style="color:'+colPct(k2.respPct,40,20)+'">'+fmtPct(k2.respPct)+'</td>'+
       '<td style="color:'+colPct(k2.convoPct,50,25)+'">'+fmtPct(k2.convoPct)+'</td>'+
       '<td style="color:'+colPct(k2.offerPct,40,20)+'">'+fmtPct(k2.offerPct)+'</td>'+
