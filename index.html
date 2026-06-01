@@ -1235,7 +1235,7 @@ return '<tr><td>'+fmtDate(r.fecha)+'</td><td class="t1">'+(r.quien||r.closer)+'<
         '<td class="t1">'+k.booked+'</td>'+
         '<td style="color:'+colPct(k.respPct,40,20)+'">'+fmtPct(k.respPct)+'</td>'+
         '<td style="color:'+colPct(k.convoPct,50,25)+'">'+fmtPct(k.convoPct)+'</td>'+
-        '<td style="color:'+colPct(k.offerPct,40,20)+'">'+fmtPct(k.offerPct)+'</td>'+
+        '<td style="color:'+colPct(k.offerPct,75,65)+'">'+fmtPct(k.offerPct)+'</td>'+
         '<td style="color:'+colPct(k.agendaPct,40,20)+'">'+fmtPct(k.agendaPct)+'</td>'+
         '<td style="color:'+colPct(k.validBook,15,8)+'">'+fmtPct(k.validBook)+'</td>'+
         '<td><button class="ibtn" onclick="borrarRep(\'cc\','+rts+')">×</button></td></tr>';
@@ -2016,7 +2016,7 @@ function updateCCPreview(){
     kpiBox('Booked',k.booked,'var(--green)')+
     kpiBox('Resp%',fmtPct(k.respPct),colPct(k.respPct,40,20))+
     kpiBox('Convo%',fmtPct(k.convoPct),colPct(k.convoPct,50,25))+
-    kpiBox('Offer%',fmtPct(k.offerPct),colPct(k.offerPct,40,20))+
+    kpiBox('Offer%',fmtPct(k.offerPct),colPct(k.offerPct,75,65))+
     kpiBox('Agenda%',fmtPct(k.agendaPct),colPct(k.agendaPct,40,20))+
     kpiBox('Valid→Book%',fmtPct(k.validBook),colPct(k.validBook,15,8));
   ge('cc-preview').style.display='block';
@@ -2087,7 +2087,7 @@ function renderDashCC(reps){
     kpiBox('Booked',k.booked,'var(--green)')+
     kpiBox('Resp%',fmtPct(k.respPct),colPct(k.respPct,40,20))+
     kpiBox('Convo%',fmtPct(k.convoPct),colPct(k.convoPct,50,25))+
-    kpiBox('Offer%',fmtPct(k.offerPct),colPct(k.offerPct,40,20))+
+    kpiBox('Offer%',fmtPct(k.offerPct),colPct(k.offerPct,75,65))+
     kpiBox('Agenda%',fmtPct(k.agendaPct),colPct(k.agendaPct,40,20))+
     kpiBox('Valid→Book%',fmtPct(k.validBook),colPct(k.validBook,15,8));
   ge('dash-thead').innerHTML='<tr><th style="text-align:left">Cold Caller</th><th>Assigned</th><th>Valid</th><th>Attempts</th><th>Responses</th><th>Convos</th><th>Offers</th><th>Booked</th><th>Resp%</th><th>Convo%</th><th>Offer%</th><th>Agenda%</th><th>Valid→Book%</th></tr>';
@@ -2106,7 +2106,7 @@ function renderDashCC(reps){
       '<td style="color:#fff;font-weight:700">'+k2.booked+'</td>'+
       '<td style="color:'+colPct(k2.respPct,40,20)+'">'+fmtPct(k2.respPct)+'</td>'+
       '<td style="color:'+colPct(k2.convoPct,50,25)+'">'+fmtPct(k2.convoPct)+'</td>'+
-      '<td style="color:'+colPct(k2.offerPct,40,20)+'">'+fmtPct(k2.offerPct)+'</td>'+
+      '<td style="color:'+colPct(k2.offerPct,75,65)+'">'+fmtPct(k2.offerPct)+'</td>'+
       '<td style="color:'+colPct(k2.agendaPct,40,20)+'">'+fmtPct(k2.agendaPct)+'</td>'+
       '<td style="color:'+colPct(k2.validBook,15,8)+';font-weight:700">'+fmtPct(k2.validBook)+'</td>'+
       '</tr>';
