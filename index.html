@@ -1105,31 +1105,36 @@ var personas=[...new Set(reps.map(r=>r.quien||r.closer))].sort();
   var gAP=pct(tot.agendadas,tot.links);
   _kpiIdx=0;
   var gDM=pct(tot.convos,tot.dms||0),gCC=pct(tot.agendadas,tot.convos);
+  var gDMAgenda=pct(tot.agendadas,tot.dms||0);
   ge('dash-global-kpi').innerHTML=
+    kpiBox('DMs enviados',tot.dms,'var(--t1)')+
     kpiBox('Convos',tot.convos,'var(--blue)')+
     kpiBox('Links',tot.links,'var(--amber)')+
     kpiBox('Agendadas',tot.agendadas,'var(--green)')+
+    kpiBox('DM→Agenda %',fmtPct(gDMAgenda),colPct(gDMAgenda,11,7))+
     kpiBox('Agenda %',fmtPct(gAP),colPct(gAP,60,30))+
     kpiBox('Convo/Call %',fmtPct(gCC),colPct(gCC,20,10));
-  ge('dash-thead').innerHTML='<tr><th style="text-align:left">Setter</th><th>Convos</th><th>Convo/Link %</th><th>Links</th><th>Agenda %</th><th>Agendadas</th><th>Convo/Call %</th></tr>';
+  ge('dash-thead').innerHTML='<tr><th style="text-align:left">Setter</th><th>DMs</th><th>Convos</th><th>Convo/Link %</th><th>Links</th><th>Agenda %</th><th>Agendadas</th><th>DM→Agenda %</th><th>Convo/Call %</th></tr>';
   var tbodyHTML='',nombres=[],nLinks=[],nAgendadas=[];
   Object.keys(personas).forEach(n=>{
     var agg={dms:0,convos:0,links:0,agendadas:0};
     personas[n].forEach(r=>Object.keys(agg).forEach(k=>{agg[k]+=(+(r[k]||0));}));
     var k=calcSetterKPI(agg);
+    var dmAgendaPct=pct(k.agendadas,k.dms||0);
     nombres.push(n);nLinks.push(k.links);nAgendadas.push(k.agendadas);
     tbodyHTML+='<tr>'+
       '<td class="t1">'+n+'</td>'+
-
+      '<td>'+k.dms+'</td>'+
       '<td>'+k.convos+'</td>'+
       '<td style="color:'+colPct(k.convoLink,20,10)+'">'+fmtPct(k.convoLink)+'</td>'+
       '<td>'+k.links+'</td>'+
       '<td style="color:'+colPct(k.agendaPct,60,30)+'">'+fmtPct(k.agendaPct)+'</td>'+
       '<td class="t1">'+k.agendadas+'</td>'+
+      '<td style="color:'+colPct(dmAgendaPct,11,7)+'">'+fmtPct(dmAgendaPct)+'</td>'+
       '<td style="color:'+colPct(k.convoCall,20,10)+'">'+fmtPct(k.convoCall)+'</td>'+
       '</tr>';
   });
-  if(!tbodyHTML) tbodyHTML='<tr><td colspan="6" class="empty">Sin datos en este período</td></tr>';
+  if(!tbodyHTML) tbodyHTML='<tr><td colspan="9" class="empty">Sin datos en este período</td></tr>';
   ge('dash-tbody').innerHTML=tbodyHTML;
   renderChart(nombres,nLinks,nAgendadas,'Links','Agendadas');
   if(ge('dash-analisis-card')) ge('dash-analisis-card').style.display='none';
