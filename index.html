@@ -977,7 +977,8 @@ function filtrarPorPeriodo(reportes){
     var lunEst=new Date(d.getFullYear(),d.getMonth(),diff2);
     var lunAnt=new Date(lunEst);lunAnt.setDate(lunAnt.getDate()-7);
     var domAnt=new Date(lunAnt);domAnt.setDate(domAnt.getDate()+6);
-    return reportes.filter(r=>r.fecha&&r.fecha>=lunAnt.toISOString().slice(0,10)&&r.fecha<=domAnt.toISOString().slice(0,10));
+    var _l=function(x){return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');};
+    return reportes.filter(r=>r.fecha&&r.fecha>=_l(lunAnt)&&r.fecha<=_l(domAnt));
   }
   if(periodo==='mes'){var mes=hoy.slice(0,7);return reportes.filter(r=>r.fecha&&r.fecha.slice(0,7)===mes);}
   if(periodo==='3meses'){var m3=addDays(hoy,-90);return reportes.filter(r=>r.fecha&&r.fecha>=m3);}
@@ -1198,7 +1199,8 @@ function renderHistorialPanel(){
     var lunEst=new Date(d.getFullYear(),d.getMonth(),diff2);
     var lunAnt=new Date(lunEst);lunAnt.setDate(lunAnt.getDate()-7);
     var domAnt=new Date(lunAnt);domAnt.setDate(domAnt.getDate()+6);
-    reps=reps.filter(r=>r.fecha&&r.fecha>=lunAnt.toISOString().slice(0,10)&&r.fecha<=domAnt.toISOString().slice(0,10));
+    var _l=function(x){return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');};
+    reps=reps.filter(r=>r.fecha&&r.fecha>=_l(lunAnt)&&r.fecha<=_l(domAnt));
   }
   else if(periodo==='semana'){
     var dow=d.getDay(),diff=d.getDate()-dow+(dow===0?-6:1);
@@ -1796,7 +1798,8 @@ function renderLlamadasPanel(){
     var lunEst=new Date(dsa.getFullYear(),dsa.getMonth(),diffsa);
     var lunAnt=new Date(lunEst);lunAnt.setDate(lunAnt.getDate()-7);
     var domAnt=new Date(lunAnt);domAnt.setDate(domAnt.getDate()+6);
-    leads=leads.filter(function(l){return l.fechaLlamada>=lunAnt.toISOString().slice(0,10)&&l.fechaLlamada<=domAnt.toISOString().slice(0,10);});
+    var _l=function(x){return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');};
+    leads=leads.filter(function(l){return l.fechaLlamada>=_l(lunAnt)&&l.fechaLlamada<=_l(domAnt);});
   }
   else if(periodo==='semana'){
     var d=new Date(),dow=d.getDay(),diff=d.getDate()-dow+(dow===0?-6:1);
