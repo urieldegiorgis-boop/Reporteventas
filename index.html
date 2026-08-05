@@ -354,6 +354,28 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
     <div id="cc-cal-stats" style="font-size:11px;color:var(--t3);margin-top:6px;text-align:center"></div>
   </div>
 
+  <!-- Stats personales cold caller -->
+  <div class="card" id="cc-stats-card" style="display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding-bottom:8px;border-bottom:0.5px solid var(--b0);flex-wrap:wrap;gap:8px;">
+      <div class="card-title" style="margin:0;padding:0;border:none;">Mis acumulados</div>
+      <select class="sel" id="cc-stats-periodo" onchange="renderCCStats()" style="min-width:130px;">
+        <option value="hoy">Hoy</option>
+        <option value="semana">Esta semana</option>
+        <option value="mes" selected>Este mes</option>
+        <option value="3meses">Últimos 3 meses</option>
+        <option value="anio">Este año</option>
+      </select>
+    </div>
+    <div class="stats-row" id="cc-stats-kpis" style="margin-bottom:1rem;"></div>
+    <div style="overflow:auto;">
+      <table class="tbl" id="cc-stats-tabla">
+        <thead><tr><th>Fecha</th><th>Assigned</th><th>Valid</th><th>Attempts</th><th>Responses</th><th>Convos</th><th>Offers</th><th>Booked</th><th>Resp/Valid%</th><th>Convo%</th><th>Book/Convo%</th></tr></thead>
+        <tbody id="cc-stats-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+
 </div>
 
 <div id="tab_dashboard" class="panel">
@@ -1234,14 +1256,14 @@ return '<tr><td>'+fmtDate(r.fecha)+'</td><td class="t1">'+(r.quien||r.closer)+'<
         '<td><button class="ibtn" onclick="borrarRep(\'closer\','+rts+')">×</button></td></tr>';
     }).join('')||'<tr><td colspan="12" class="empty">Sin reportes</td></tr>';
   } else if(eq==='cold_callers'){
-    ge('hist-thead').innerHTML='<tr><th>Fecha</th><th>Cold Caller</th><th>Assigned</th><th>Valid</th><th>Attempts</th><th>Responses</th><th>Convos</th><th>Offers</th><th>Booked</th><th>Resp%</th><th>Convo%</th><th>Offer%</th><th>Agenda%</th><th>Valid→Book%</th><th></th></tr>';
+    ge('hist-thead').innerHTML='<tr><th>Fecha</th><th>Cold Caller</th><th>Assigned</th><th>Valid</th><th>Attempts</th><th>Responses</th><th>Convos</th><th>Offers</th><th>Booked</th><th>Resp/Valid%</th><th>Convo%</th><th>Offer%</th><th>Agenda%</th><th>Valid→Book%</th><th></th></tr>';
     ge('hist-tbody').innerHTML=filtered.map(function(r){
       var k=calcCCKPI(r),rts=r.ts||0;
       return '<tr><td>'+fmtDate(r.fecha)+'</td><td class="t1">'+r.quien+'</td>'+
         '<td>'+k.assigned+'</td><td>'+k.valid+'</td><td>'+k.attempts+'</td><td>'+k.responses+'</td>'+
         '<td>'+k.convos+'</td><td>'+k.offers+'</td>'+
         '<td class="t1">'+k.booked+'</td>'+
-        '<td style="color:'+colPct(k.respPct,40,20)+'">'+fmtPct(k.respPct)+'</td>'+
+        '<td style="color:'+colPct(k.respPct,50,30)+'">'+fmtPct(k.respPct)+'</td>'+
         '<td style="color:'+colPct(k.convoPct,50,25)+'">'+fmtPct(k.convoPct)+'</td>'+
         '<td style="color:'+colPct(k.offerPct,75,65)+'">'+fmtPct(k.offerPct)+'</td>'+
         '<td style="color:'+colPct(k.agendaPct,40,20)+'">'+fmtPct(k.agendaPct)+'</td>'+
@@ -2002,8 +2024,11 @@ function calcCCKPI(r){
       responses=+(r.responses||0),convos=+(r.convos||0),offers=+(r.offers||0),
       booked=+(r.booked||0);
   return{assigned,valid,attempts,responses,convos,offers,booked,
-    respPct:   pct(responses,attempts),
+    respPct:   pct(responses,valid),
+    respAtt:   pct(responses,attempts),
     convoPct:  pct(convos,responses),
+    convoResp: pct(convos,responses),
+    bookConvo: pct(booked,convos),
     offerPct:  pct(offers,convos),
     agendaPct: pct(booked,offers),
     validBook: pct(booked,valid),
@@ -2013,7 +2038,8 @@ function onSelCC(){
   var quien=ge('cc-quien').value;
   ge('cc-nombre-lbl').textContent=quien||'selecciona tu nombre';
   if(!ge('cc-fecha').value)ge('cc-fecha').value=today();
-  if(quien){renderCal('cc',quien);renderCCStats();}
+  if(quien){ge('cc-stats-card').style.display='block';renderCal('cc',quien);renderCCStats();}
+  else{ge('cc-stats-card').style.display='none';}
 }
 function updateCCPreview(){
   var r={assigned:gv('cc-assigned'),valid:gv('cc-valid'),attempts:gv('cc-attempts'),
@@ -2023,7 +2049,7 @@ function updateCCPreview(){
   var k=calcCCKPI(r);_kpiIdx=0;
   ge('cc-kpi-row').innerHTML=
     kpiBox('Booked',k.booked,'var(--green)')+
-    kpiBox('Resp%',fmtPct(k.respPct),colPct(k.respPct,40,20))+
+    kpiBox('Resp/Valid%',fmtPct(k.respPct),colPct(k.respPct,50,30))+
     kpiBox('Convo%',fmtPct(k.convoPct),colPct(k.convoPct,50,25))+
     kpiBox('Offer%',fmtPct(k.offerPct),colPct(k.offerPct,75,65))+
     kpiBox('Agenda%',fmtPct(k.agendaPct),colPct(k.agendaPct,40,20))+
@@ -2065,16 +2091,17 @@ function renderCCStats(){
   ge('cc-stats-kpis').innerHTML=
     kpiBox('Assigned',k.assigned,'var(--t1)')+
     kpiBox('Booked',k.booked,'var(--green)')+
-    kpiBox('Resp/Att%',fmtPct(k.respAtt),colPct(k.respAtt,40,20))+
-    kpiBox('Book/Att%',fmtPct(k.bookAtt),colPct(k.bookAtt,15,8))+
-    kpiBox('Convo/Resp%',fmtPct(k.convoResp),colPct(k.convoResp,50,25));
+    kpiBox('Resp/Valid%',fmtPct(k.respPct),colPct(k.respPct,50,30))+
+    kpiBox('Convo%',fmtPct(k.convoPct),colPct(k.convoPct,50,25))+
+    kpiBox('Agenda%',fmtPct(k.agendaPct),colPct(k.agendaPct,40,20))+
+    kpiBox('Valid→Book%',fmtPct(k.validBook),colPct(k.validBook,15,8));
   ge('cc-stats-tbody').innerHTML=reps.map(function(r){
     var k2=calcCCKPI(r);
     return '<tr><td>'+fmtDate(r.fecha)+'</td>'+
-      '<td>'+k2.assigned+'</td><td>'+k2.attempts+'</td><td>'+k2.responses+'</td>'+
+      '<td>'+k2.assigned+'</td><td>'+k2.valid+'</td><td>'+k2.attempts+'</td><td>'+k2.responses+'</td>'+
       '<td>'+k2.convos+'</td><td>'+k2.offers+'</td>'+
       '<td class="t1">'+k2.booked+'</td>'+
-            '<td style="color:'+colPct(k2.respAtt,40,20)+'">'+fmtPct(k2.respAtt)+'</td>'+
+            '<td style="color:'+colPct(k2.respPct,50,30)+'">'+fmtPct(k2.respPct)+'</td>'+
       '<td style="color:'+colPct(k2.convoResp,50,25)+'">'+fmtPct(k2.convoResp)+'</td>'+
       '<td style="color:'+colPct(k2.bookConvo,30,15)+'">'+fmtPct(k2.bookConvo)+'</td>'+
       '</tr>';
@@ -2094,12 +2121,12 @@ function renderDashCC(reps){
   ge('dash-global-kpi').innerHTML=
     kpiBox('Assigned',k.assigned,'var(--t1)')+
     kpiBox('Booked',k.booked,'var(--green)')+
-    kpiBox('Resp%',fmtPct(k.respPct),colPct(k.respPct,40,20))+
+    kpiBox('Resp/Valid%',fmtPct(k.respPct),colPct(k.respPct,50,30))+
     kpiBox('Convo%',fmtPct(k.convoPct),colPct(k.convoPct,50,25))+
     kpiBox('Offer%',fmtPct(k.offerPct),colPct(k.offerPct,75,65))+
     kpiBox('Agenda%',fmtPct(k.agendaPct),colPct(k.agendaPct,40,20))+
     kpiBox('Valid→Book%',fmtPct(k.validBook),colPct(k.validBook,15,8));
-  ge('dash-thead').innerHTML='<tr><th style="text-align:left">Cold Caller</th><th>Assigned</th><th>Valid</th><th>Attempts</th><th>Responses</th><th>Convos</th><th>Offers</th><th>Booked</th><th>Resp%</th><th>Convo%</th><th>Offer%</th><th>Agenda%</th><th>Valid→Book%</th></tr>';
+  ge('dash-thead').innerHTML='<tr><th style="text-align:left">Cold Caller</th><th>Assigned</th><th>Valid</th><th>Attempts</th><th>Responses</th><th>Convos</th><th>Offers</th><th>Booked</th><th>Resp/Valid%</th><th>Convo%</th><th>Offer%</th><th>Agenda%</th><th>Valid→Book%</th></tr>';
   ge('dash-tbody').innerHTML=Object.keys(personas).map(function(n){
     var agg={assigned:0,valid:0,attempts:0,responses:0,convos:0,offers:0,booked:0};
     personas[n].forEach(function(r){Object.keys(agg).forEach(function(k){agg[k]+=(+(r[k]||0));});});
@@ -2113,7 +2140,7 @@ function renderDashCC(reps){
       '<td style="color:#fff">'+k2.convos+'</td>'+
       '<td style="color:#fff">'+k2.offers+'</td>'+
       '<td style="color:#fff;font-weight:700">'+k2.booked+'</td>'+
-      '<td style="color:'+colPct(k2.respPct,40,20)+'">'+fmtPct(k2.respPct)+'</td>'+
+      '<td style="color:'+colPct(k2.respPct,50,30)+'">'+fmtPct(k2.respPct)+'</td>'+
       '<td style="color:'+colPct(k2.convoPct,50,25)+'">'+fmtPct(k2.convoPct)+'</td>'+
       '<td style="color:'+colPct(k2.offerPct,75,65)+'">'+fmtPct(k2.offerPct)+'</td>'+
       '<td style="color:'+colPct(k2.agendaPct,40,20)+'">'+fmtPct(k2.agendaPct)+'</td>'+
